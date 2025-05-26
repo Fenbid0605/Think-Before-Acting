@@ -22,8 +22,11 @@ Executor ：部署于边缘计算平台 Jetson Orin Nano，通过轻量级 MCP �
 
 ### 多模态硬件集成
 听觉：科大讯飞语音模块
+
 视觉：Intel Realsense D437相机
+
 触觉：Gelsight Mini触觉传感器
+
 边缘计算：Jetson Orin Nano
 
 ## 系统功能与亮点
