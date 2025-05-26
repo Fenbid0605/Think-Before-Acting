@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多模态AI交互系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">多模态AI交互系统</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#configInfoModal">
+                                <i class="bi bi-info-circle"></i> 配置信息
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="row main-container">
+            <!-- 聊天区域 -->
+            <div class="col-md-8 chat-container">
+                <div id="chat-messages" class="chat-messages"></div>
+                
+                <div class="chat-input-container">
+                    <div class="image-preview-container" id="image-preview-container"></div>
+                    <div class="input-group">
+                        <input type="file" id="image-upload" class="d-none" accept="image/*">
+                        <button class="btn btn-outline-secondary" type="button" id="upload-image-btn">
+                            <i class="bi bi-image"></i> 图片
+                        </button>
+                        <input type="text" id="user-input" class="form-control" placeholder="输入消息...">
+                        <button class="btn btn-primary" type="button" id="send-btn">发送</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 工具调用区域 -->
+            <div class="col-md-4 tools-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>工具调用</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="tool-calls-container">
+                            <div class="text-center text-muted py-5">
+                                <p>与AI交互时检测到的工具调用将显示在这里</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 配置信息弹窗 -->
+    <div class="modal fade" id="configInfoModal" tabindex="-1" aria-labelledby="configInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="configInfoModalLabel">配置信息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <h5><i class="bi bi-info-circle"></i> 关于配置</h5>
+                        <p>本系统使用 <code>config.ini</code> 文件进行配置，而不是通过网页设置API密钥。</p>
+                        <p>要更改配置，请直接编辑项目根目录下的 <code>config.ini</code> 文件。</p>
+                    </div>
+                    
+                    <h6>当前配置状态：</h6>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    NVIDIA API密钥
+                                    <span class="badge {{ 'bg-success' if api_key_set else 'bg-danger' }}">
+                                        {{ '已设置' if api_key_set else '未设置' }}
+                                    </span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    模型
+                                    <span class="badge bg-info">{{ model }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    温度
+                                    <span class="badge bg-info">{{ temperature }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h6>配置文件示例：</h6>
+                    <pre class="bg-light p-3 rounded"><code>[API]
+; NVIDIA NIM API密钥
+api_key = 您的NVIDIA API密钥
+
+[MODEL]
+; 使用的模型名称
+model = microsoft/phi-3-vision-128k
+; 生成参数
+temperature = 0.7
+max_tokens = 4096
+
+[SERVER]
+; 服务器设置
+host = 0.0.0.0
+port = 8000</code></pre>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <p><strong>注意：</strong> 修改配置文件后需要重启服务器才能生效。</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工具参数弹窗 -->
+    <div class="modal fade" id="toolParamsModal" tabindex="-1" aria-labelledby="toolParamsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="toolParamsModalLabel">工具参数</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="tool-params-form">
+                        <div id="params-container"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="execute-tool-btn">执行</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html> 
