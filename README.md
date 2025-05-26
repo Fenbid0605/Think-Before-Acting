@@ -1,7 +1,7 @@
 # 思而后行
 基于视触听觉多模态的服务机器人
 
-Developed by [@Fenbid0605](https://github.com/Fenbid0605) and [@0xJack](https://github.com/0xJack)
+Developed by [@Fenbid0605](https://github.com/Fenbid0605) and [@0xJacky](https://github.com/0xJacky)
 
 ## 项目概述 
 ### 引言
